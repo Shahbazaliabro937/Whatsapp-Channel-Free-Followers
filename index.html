@@ -26,7 +26,7 @@
 </head>
 <body>
 
-    <!-- 1. Navigation Header (Replicating typical website header) -->
+    <!-- 1. Navigation Header -->
     <nav class="primary-bg text-white shadow-lg sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -35,12 +35,14 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <!-- Nav Links -->
-                    <button class="text-sm font-medium hover:text-gray-300 transition duration-150" onclick="showSubmissionView()">
+                    <!-- Submission button will now navigate to #submission -->
+                    <a href="#submission" class="text-sm font-medium hover:text-gray-300 transition duration-150">
                         Submission
-                    </button>
-                    <button id="admin-link-btn" class="hidden text-sm font-medium text-yellow-300 hover:text-yellow-400 transition duration-150" onclick="showAdminDashboard()">
+                    </a>
+                    <!-- Admin button will now navigate to #admin -->
+                    <a id="admin-link-btn" href="#admin" class="hidden text-sm font-medium text-yellow-300 hover:text-yellow-400 transition duration-150">
                         Admin Panel
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -111,9 +113,10 @@
             <!-- Admin Dashboard View -->
             <div id="admin-dashboard-view" class="hidden">
                 <h2 class="text-3xl font-bold text-red-600 border-b pb-2 mb-6">Admin Dashboard (Pending Appeals)</h2>
-                <button class="text-sm font-semibold text-white px-3 py-2 rounded-md bg-gray-500 hover:bg-gray-600 transition duration-150 mb-4" onclick="showSubmissionView()">
+                <!-- Button to navigate back to #submission -->
+                <a href="#submission" class="inline-block text-sm font-semibold text-white px-3 py-2 rounded-md bg-gray-500 hover:bg-gray-600 transition duration-150 mb-4">
                     ← Go Back to Submission View
-                </button>
+                </a>
                 <div id="pending-appeals-list" class="space-y-4">
                     <!-- Pending submissions will load here -->
                     <p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">No pending appeals.</p>
@@ -136,7 +139,7 @@
         <p class="text-sm">&copy; 2024 Channel Review Studio. All rights reserved.</p>
     </footer>
 
-    <!-- Firebase SDK Imports (Logic is the same as the previous version) -->
+    <!-- Firebase SDK Imports (Logic Updated for Hash Routing) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -178,6 +181,40 @@
             };
         }
 
+        // --- View Switching Logic (Now controls the hash too) ---
+
+        // This function reads the hash and displays the correct view
+        function routeByHash() {
+            const hash = window.location.hash || '#submission';
+            
+            // Default to submission view
+            document.getElementById('submission-view').classList.remove('hidden');
+            document.getElementById('admin-dashboard-view').classList.add('hidden');
+
+            if (hash === '#admin') {
+                if (isAdmin) {
+                    // Show admin view if hash is #admin AND user is admin
+                    document.getElementById('submission-view').classList.add('hidden');
+                    document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                    // Hide the Admin button link when already on the dashboard
+                    document.getElementById('admin-link-btn').classList.add('hidden');
+                } else {
+                    // If a non-admin tries to access #admin, redirect them to #submission
+                    showMessage("Access Denied", "You do not have administrative privileges to view this page.");
+                    window.location.hash = 'submission';
+                }
+            } else if (hash === '#submission') {
+                // If on submission view, ensure admin button is visible if admin
+                if (isAdmin) {
+                    document.getElementById('admin-link-btn').classList.remove('hidden');
+                }
+            }
+        }
+
+        // Add event listener for when the hash changes (e.g., back/forward buttons)
+        window.addEventListener('hashchange', routeByHash);
+
+
         // --- Firebase Setup and Authentication ---
         if (firebaseConfig) {
             try {
@@ -206,7 +243,6 @@
                         `;
                         
                         if (isAdmin) {
-                            document.getElementById('admin-link-btn').classList.remove('hidden');
                             // Set up the listener for pending appeals
                             setupPendingListener();
                         }
@@ -214,12 +250,16 @@
                         // Set up the listener for published channels
                         setupPublishedListener();
 
+                        // IMPORTANT: Now that isAdmin is set, route the user based on the initial hash
+                        routeByHash();
+
                     } else {
                         // User logged out/not authenticated
                         userId = null;
                         isAdmin = false;
                         document.getElementById('user-info').innerHTML = `Your Status: <span class="font-semibold text-red-600">Not Authenticated</span>.`;
                         document.getElementById('admin-link-btn').classList.add('hidden');
+                        routeByHash(); // Route to submission if not logged in
                     }
                 });
 
@@ -239,26 +279,8 @@
         }
 
 
-        // --- View Switching Logic ---
-        window.showAdminDashboard = function() {
-            if (isAdmin) {
-                document.getElementById('submission-view').classList.add('hidden');
-                document.getElementById('admin-dashboard-view').classList.remove('hidden');
-                document.getElementById('admin-link-btn').classList.add('hidden');
-            } else {
-                showMessage("Permission Denied", "You are not the administrator and cannot access this panel.");
-            }
-        }
+        // --- Channel Submission Logic and Admin Action Logic remain the same ---
 
-        window.showSubmissionView = function() {
-            document.getElementById('submission-view').classList.remove('hidden');
-            document.getElementById('admin-dashboard-view').classList.add('hidden');
-            if (isAdmin) {
-                 document.getElementById('admin-link-btn').classList.remove('hidden');
-            }
-        }
-
-        // --- Channel Submission Logic ---
         document.getElementById('channel-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -303,7 +325,6 @@
             }
         });
 
-        // --- Admin Action Logic ---
         window.handleAdminAction = async function(docId, action) {
             if (!isAdmin) {
                 showMessage("Permission Denied", "You do not have permission to perform this action.");
@@ -346,7 +367,7 @@
         }
 
 
-        // --- Listeners for Realtime Data ---
+        // --- Listeners for Realtime Data remain the same ---
 
         // Pending Channels Listener (Admin Only)
         function setupPendingListener() {
@@ -371,17 +392,4 @@
                         <div class="border p-4 rounded-lg shadow-md bg-white space-y-2 border-l-4 border-red-500">
                             <h3 class="text-xl font-bold text-gray-800">${data.name}</h3>
                             <p class="text-sm text-gray-600">Link: <a href="${data.link}" target="_blank" class="text-blue-500 hover:underline break-all">${data.link}</a></p>
-                            <p class="text-sm text-gray-600">Category: <span class="font-medium bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">${data.category.toUpperCase()}</span></p>
-                            <p class="text-gray-700 mt-1">Details: ${data.details}</p>
-                            <p class="text-xs text-gray-400">Submitted By: <span class="text-gray-600">${data.submittedBy}</span></p>
-                            <div class="mt-3 flex space-x-2">
-                                <button onclick="handleAdminAction('${docId}', 'approve')" class="flex-1 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-150">
-                                    Approve
-                                </button>
-                                <button onclick="handleAdminAction('${docId}', 'reject')" class="flex-1 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-150">
-                                    Reject
-                                </button>
-                            </div>
-                        </div>
-                    `;
-        
+                            <p class="text-sm text-gray-60
