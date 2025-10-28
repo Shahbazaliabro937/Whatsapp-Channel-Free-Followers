@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Channel Submission and Admin Panel</title>
+    <!-- Load Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Set Inter font as default */
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        /* WhatsApp-like green colour palette */
+        .whatsapp-primary { background-color: #075E54; }
+        .whatsapp-secondary { background-color: #128C7E; }
+        .whatsapp-light-bg { background-color: #DCF8C6; }
+        .card { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .input-focus:focus { border-color: #128C7E; box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen flex flex-col items-center p-4 sm:p-8">
+        <!-- Header -->
+        <header class="whatsapp-primary text-white w-full max-w-4xl rounded-xl p-4 mb-6 card">
+            <h1 class="text-3xl font-bold text-center">WhatsApp Channel Review Portal</h1>
+            <p class="text-center mt-1 text-sm">Submit a new channel or view existing ones.</p>
+        </header>
+
+        <!-- Admin / User Views Container -->
+        <div class="w-full max-w-4xl bg-white rounded-xl p-6 card">
+
+            <!-- Authentication Status and Admin Link -->
+            <div id="auth-status" class="mb-4 p-3 bg-gray-100 rounded-lg flex justify-between items-center text-sm">
+                <p id="user-info">Your Status: <span class="font-semibold text-gray-600">Loading...</span></p>
+                <!-- Admin Dashboard Link, only visible to admin -->
+                <button id="admin-link-btn" class="hidden text-sm font-semibold text-white px-3 py-1 rounded-full whatsapp-secondary hover:bg-teal-600 transition duration-150" onclick="showAdminDashboard()">
+                    View Admin Dashboard
+                </button>
+            </div>
+
+            <!-- Submission Form View -->
+            <div id="submission-view" class="space-y-6">
+                <h2 class="text-2xl font-semibold border-b pb-2 mb-4 text-gray-700">Submit a New Channel</h2>
+                <form id="channel-form" class="space-y-4">
+
+                    <!-- Channel Name -->
+                    <div>
+                        <label for="channel-name" class="block text-sm font-medium text-gray-700">Channel Name</label>
+                        <input type="text" id="channel-name" required placeholder="Enter the name of your channel" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                    </div>
+
+                    <!-- Channel Link -->
+                    <div>
+                        <label for="channel-link" class="block text-sm font-medium text-gray-700">Channel Link (URL)</label>
+                        <input type="url" id="channel-link" required placeholder="https://whatsapp.com/channel/..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                    </div>
+
+                    <!-- Channel Details / Description -->
+                    <div>
+                        <label for="channel-details" class="block text-sm font-medium text-gray-700">Channel Details (Description)</label>
+                        <textarea id="channel-details" rows="3" required placeholder="Describe what your channel is about and its content." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus"></textarea>
+                    </div>
+
+                    <!-- Channel Category -->
+                    <div>
+                        <label for="channel-category" class="block text-sm font-medium text-gray-700">Select Category</label>
+                        <select id="channel-category" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus appearance-none bg-white">
+                            <option value="" disabled selected>--- Select Category ---</option>
+                            <option value="news">News</option>
+                            <option value="sports">Sports</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="tech">Technology</option>
+                            <option value="finance">Finance & Business</option>
+                            <option value="lifestyle">Lifestyle & Health</option>
+                            <option value="education">Education</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white whatsapp-secondary hover:bg-teal-600 transition duration-150">
+                        Submit Channel for Review
+                    </button>
+                </form>
+
+                <!-- Published Channels List -->
+                <h2 class="text-2xl font-semibold border-b pt-6 pb-2 mb-4 text-gray-700 mt-8">Approved Channels (Public List)</h2>
+                <div id="published-channels-list" class="space-y-4">
+                    <!-- Approved channels will load here -->
+                    <p class="text-center text-gray-500">Approved Channels loading...</p>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard View -->
+            <div id="admin-dashboard-view" class="hidden">
+                <h2 class="text-2xl font-semibold border-b pb-2 mb-4 text-red-600">Admin Dashboard (Pending Appeals)</h2>
+                <button class="text-sm font-semibold text-white px-3 py-1 rounded-full bg-gray-500 hover:bg-gray-600 transition duration-150 mb-4" onclick="showSubmissionView()">
+                    Return to Public View
+                </button>
+                <div id="pending-appeals-list" class="space-y-4">
+                    <!-- Pending submissions will load here -->
+                    <p class="text-center text-gray-500">No pending appeals.</p>
+                </div>
+            </div>
+
+            <!-- Custom Alert Message Box -->
+            <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
+                <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+                    <h3 id="message-title" class="text-lg font-bold mb-3">Message</h3>
+                    <p id="message-text" class="mb-4 text-gray-700"></p>
+                    <button id="message-close" class="w-full py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, addDoc, getDoc, setDoc, deleteDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- Global Variables (Provided by Canvas Environment) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- Firebase Initialization Variables ---
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAdmin = false;
+
+        // Hardcoded admin UID mechanism for this prototype: 
+        // The first user who logs in sets the ADMIN_UID in localStorage.
+        const ADMIN_UID_KEY = 'admin_uid_for_app'; 
+        let ADMIN_UID = localStorage.getItem(ADMIN_UID_KEY);
+
+        // Firestore Path Variables
+        const PUBLIC_PATH = `artifacts/${appId}/public/data/`;
+        const PENDING_COLLECTION = `${PUBLIC_PATH}pending_channels`;
+        const PUBLISHED_COLLECTION = `${PUBLIC_PATH}published_channels`;
+
+        // --- Utility Functions ---
+
+        // Custom Alert Function (To avoid using window.alert())
+        function showMessage(title, message) {
+            document.getElementById('message-title').textContent = title;
+            document.getElementById('message-text').textContent = message;
+            document.getElementById('message-box').classList.remove('hidden');
+            document.getElementById('message-box').classList.add('flex');
+            document.getElementById('message-close').onclick = () => {
+                document.getElementById('message-box').classList.add('hidden');
+                document.getElementById('message-box').classList.remove('flex');
+            };
+        }
+
+        // --- Firebase Setup and Authentication ---
+        if (firebaseConfig) {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Auth state listener
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        
+                        // Set the first authenticated user as the admin for this demo
+                        if (!ADMIN_UID) {
+                            ADMIN_UID = userId;
+                            localStorage.setItem(ADMIN_UID_KEY, ADMIN_UID);
+                            console.log("SUCCESS: Current user set as Admin for this app.");
+                        }
+
+                        isAdmin = (userId === ADMIN_UID);
+                        
+                        document.getElementById('user-info').innerHTML = `
+                            Your Status: <span class="font-semibold text-green-600">Authenticated</span>. 
+                            UserID: <span class="text-xs break-all">${userId}</span>
+                        `;
+                        
+                        if (isAdmin) {
+                            document.getElementById('admin-link-btn').classList.remove('hidden');
+                            document.getElementById('user-info').innerHTML += ` <span class="text-red-600 font-bold">(ADMIN)</span>`;
+                            // Set up the listener for pending appeals
+                            setupPendingListener();
+                        }
+
+                        // Set up the listener for published channels
+                        setupPublishedListener();
+
+                    } else {
+                        // User logged out/not authenticated
+                        userId = null;
+                        isAdmin = false;
+                        document.getElementById('user-info').innerHTML = `Your Status: <span class="font-semibold text-red-600">Not Authenticated</span>.`;
+                        document.getElementById('admin-link-btn').classList.add('hidden');
+                    }
+                });
+
+                // Initial sign-in with custom token or anonymously
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                showMessage("Error", "Could not initialize Firebase. Check console for details.");
+            }
+        } else {
+            showMessage("Database Error", "Firebase configuration is missing. The application will not function.");
+        }
+
+
+        // --- View Switching Logic ---
+        window.showAdminDashboard = function() {
+            if (isAdmin) {
+                document.getElementById('submission-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                document.getElementById('admin-link-btn').classList.add('hidden');
+            } else {
+                showMessage("Permission Denied", "You are not the administrator and cannot access this panel.");
+            }
+        }
+
+        window.showSubmissionView = function() {
+            document.getElementById('submission-view').classList.remove('hidden');
+            document.getElementById('admin-dashboard-view').classList.add('hidden');
+            if (isAdmin) {
+                 document.getElementById('admin-link-btn').classList.remove('hidden');
+            }
+        }
+
+        // --- Channel Submission Logic ---
+        document.getElementById('channel-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!userId) {
+                showMessage("Authentication Required", "You must be authenticated to submit data. Please wait a moment for authentication to complete.");
+                return;
+            }
+
+            const channelName = document.getElementById('channel-name').value.trim();
+            const channelLink = document.getElementById('channel-link').value.trim();
+            const channelDetails = document.getElementById('channel-details').value.trim();
+            const channelCategory = document.getElementById('channel-category').value;
+
+            if (!channelName || !channelLink || !channelDetails || !channelCategory) {
+                 showMessage("Required Information", "Please fill in all fields.");
+                 return;
+            }
+
+            const newChannel = {
+                name: channelName,
+                link: channelLink,
+                details: channelDetails,
+                category: channelCategory,
+                submittedBy: userId,
+                submittedAt: new Date().toISOString()
+            };
+
+            try {
+                // Add the channel to the pending collection
+                await addDoc(collection(db, PENDING_COLLECTION), newChannel);
+
+                showMessage("Submission Successful!", 
+                    "Your channel has been sent for review. It will appear in the public list once approved by the admin."
+                );
+
+                // Reset the form
+                document.getElementById('channel-form').reset();
+
+            } catch (error) {
+                console.error("Submission Error:", error);
+                showMessage("Submission Error", `The channel could not be submitted. Error: ${error.message}`);
+            }
+        });
+
+        // --- Admin Action Logic ---
+        window.handleAdminAction = async function(docId, action) {
+            if (!isAdmin) {
+                showMessage("Permission Denied", "You do not have permission to perform this action.");
+                return;
+            }
+
+            const docRef = doc(db, PENDING_COLLECTION, docId);
+
+            try {
+                if (action === 'approve') {
+                    // Fetch the pending document
+                    const pendingDoc = await getDoc(docRef);
+                    if (pendingDoc.exists()) {
+                        const data = pendingDoc.data();
+                        
+                        // Copy to Published collection
+                        await setDoc(doc(db, PUBLISHED_COLLECTION, docId), {
+                            ...data,
+                            approvedBy: userId,
+                            approvedAt: new Date().toISOString(),
+                            status: 'approved'
+                        });
+
+                        // Delete from Pending collection
+                        await deleteDoc(docRef);
+                        showMessage("Approved", `Channel '${data.name}' has been successfully approved and uploaded to the public list.`);
+
+                    } else {
+                         showMessage("Error", "This appeal has already been approved or rejected.");
+                    }
+                } else if (action === 'reject') {
+                    // Delete from Pending collection
+                    await deleteDoc(docRef);
+                    showMessage("Appeal Rejected", "Channel submission has been rejected.");
+                }
+            } catch (error) {
+                console.error("Admin Action Error:", error);
+                showMessage("Action Error", `The action could not be completed. Error: ${error.message}`);
+            }
+        }
+
+
+        // --- Listeners for Realtime Data ---
+
+        // Pending Channels Listener (Admin Only)
+        function setupPendingListener() {
+            if (!db || !ADMIN_UID) return;
+
+            const q = query(collection(db, PENDING_COLLECTION));
+            
+            onSnapshot(q, (snapshot) => {
+                const listContainer = document.getElementById('pending-appeals-list');
+                listContainer.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    listContainer.innerHTML = '<p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">There are no pending appeals.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const docId = doc.id;
+                    
+                    const appealElement = `
+                        <div class="border p-4 rounded-lg shadow-md bg-white space-y-2">
+                            <h3 class="text-xl font-bold text-gray-800">${data.name}</h3>
+                            <p class="text-sm text-gray-600">Link: <a href="${data.link}" target="_blank" class="text-blue-500 hover:underline break-all">${data.link}</a></p>
+                            <p class="text-sm text-gray-600">Category: <span class="font-medium bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">${data.category.toUpperCase()}</span></p>
+                            <p class="text-gray-700 mt-1">Details: ${data.details}</p>
+                            <p class="text-xs text-gray-400">Submitted By: ${data.submittedBy.substring(0, 10)}... (ID: ${data.submittedBy})</p>
+                            <div class="mt-3 flex space-x-2">
+                                <button onclick="handleAdminAction('${docId}', 'approve')" class="flex-1 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-150">
+                                    Approve
+                                </button>
+                                <button onclick="handleAdminAction('${docId}', 'reject')" class="flex-1 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-150">
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += appealElement;
+                });
+            });
+        }
+
+
+        // Published Channels Listener (All Users)
+        function setupPublishedListener() {
+            if (!db) return;
+
+            const q = query(collection(db, PUBLISHED_COLLECTION));
+            
+            onSnapshot(q, (snapshot) => {
+                const listContainer = document.getElementById('published-channels-list');
+                listContainer.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    listContainer.innerHTML = '<p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">No channels have been approved yet.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    const channelElement = `
+                        <div class="border border-green-100 p-4 rounded-lg bg-whatsapp-light-bg shadow-sm ho
