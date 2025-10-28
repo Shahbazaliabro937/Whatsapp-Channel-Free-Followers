@@ -3,62 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Channel Submission and Admin Panel</title>
+    <title>WhatsApp Channel Review Portal</title>
     <!-- Load Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Set Inter font as default */
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        /* WhatsApp-like green colour palette */
-        .whatsapp-primary { background-color: #075E54; }
-        .whatsapp-secondary { background-color: #128C7E; }
-        .whatsapp-light-bg { background-color: #DCF8C6; }
-        .card { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .input-focus:focus { border-color: #128C7E; box-shadow: 0 0 0 3px rgba(18, 140, 126, 0.2); }
+        /* Set Inter font as default and apply a clean background */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #e5e7eb; /* Light gray background */
+        }
+        /* Define a core color palette for a professional look */
+        .primary-bg { background-color: #1f2937; } /* Dark Gray */
+        .primary-text { color: #1f2937; }
+        .accent-bg { background-color: #10b981; } /* Emerald Green for action */
+        .card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .input-focus:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        .main-container {
+            min-height: calc(100vh - 8rem); /* Adjust for header and footer height */
+            padding-bottom: 2rem;
+        }
     </style>
 </head>
 <body>
 
-    <div id="app" class="min-h-screen flex flex-col items-center p-4 sm:p-8">
-        <!-- Header -->
-        <header class="whatsapp-primary text-white w-full max-w-4xl rounded-xl p-4 mb-6 card">
-            <h1 class="text-3xl font-bold text-center">WhatsApp Channel Review Portal</h1>
-            <p class="text-center mt-1 text-sm">Submit a new channel or view existing ones.</p>
-        </header>
+    <!-- 1. Navigation Header (Replicating typical website header) -->
+    <nav class="primary-bg text-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold tracking-wider">Channel Review Studio</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Nav Links -->
+                    <button class="text-sm font-medium hover:text-gray-300 transition duration-150" onclick="showSubmissionView()">
+                        Submission
+                    </button>
+                    <button id="admin-link-btn" class="hidden text-sm font-medium text-yellow-300 hover:text-yellow-400 transition duration-150" onclick="showAdminDashboard()">
+                        Admin Panel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-        <!-- Admin / User Views Container -->
-        <div class="w-full max-w-4xl bg-white rounded-xl p-6 card">
+    <!-- 2. Main Content Container -->
+    <div id="app" class="main-container flex flex-col items-center pt-8">
+        <div class="w-full max-w-4xl bg-white rounded-lg p-6 card">
 
-            <!-- Authentication Status and Admin Link -->
-            <div id="auth-status" class="mb-4 p-3 bg-gray-100 rounded-lg flex justify-between items-center text-sm">
-                <p id="user-info">Your Status: <span class="font-semibold text-gray-600">Loading...</span></p>
-                <!-- Admin Dashboard Link, only visible to admin -->
-                <button id="admin-link-btn" class="hidden text-sm font-semibold text-white px-3 py-1 rounded-full whatsapp-secondary hover:bg-teal-600 transition duration-150" onclick="showAdminDashboard()">
-                    View Admin Dashboard
-                </button>
+            <!-- Authentication Status and User ID -->
+            <div id="auth-status" class="mb-6 p-4 bg-gray-100 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center text-sm border-l-4 border-gray-400">
+                <p id="user-info" class="text-gray-600 mb-2 sm:mb-0">Your Status: <span class="font-semibold text-gray-600">Loading...</span></p>
             </div>
 
             <!-- Submission Form View -->
-            <div id="submission-view" class="space-y-6">
-                <h2 class="text-2xl font-semibold border-b pb-2 mb-4 text-gray-700">Submit a New Channel</h2>
-                <form id="channel-form" class="space-y-4">
+            <div id="submission-view" class="space-y-8">
+                <h2 class="text-3xl font-bold primary-text border-b pb-2">Submit a New WhatsApp Channel</h2>
+                <form id="channel-form" class="space-y-4 p-4 border border-gray-200 rounded-lg">
 
                     <!-- Channel Name -->
                     <div>
                         <label for="channel-name" class="block text-sm font-medium text-gray-700">Channel Name</label>
-                        <input type="text" id="channel-name" required placeholder="Enter the name of your channel" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                        <input type="text" id="channel-name" required placeholder="e.g., Daily Tech News" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
                     </div>
 
                     <!-- Channel Link -->
                     <div>
-                        <label for="channel-link" class="block text-sm font-medium text-gray-700">Channel Link (URL)</label>
+                        <label for="channel-link" class="block text-sm font-medium text-gray-700">Channel Link (Full URL)</label>
                         <input type="url" id="channel-link" required placeholder="https://whatsapp.com/channel/..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
                     </div>
 
                     <!-- Channel Details / Description -->
                     <div>
-                        <label for="channel-details" class="block text-sm font-medium text-gray-700">Channel Details (Description)</label>
-                        <textarea id="channel-details" rows="3" required placeholder="Describe what your channel is about and its content." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus"></textarea>
+                        <label for="channel-details" class="block text-sm font-medium text-gray-700">Channel Details (Short Description)</label>
+                        <textarea id="channel-details" rows="3" required placeholder="Describe the channel's purpose and content in brief." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus"></textarea>
                     </div>
 
                     <!-- Channel Category -->
@@ -78,13 +95,13 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white whatsapp-secondary hover:bg-teal-600 transition duration-150">
+                    <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-md shadow-md text-lg font-medium text-white accent-bg hover:bg-emerald-600 transition duration-150">
                         Submit Channel for Review
                     </button>
                 </form>
 
                 <!-- Published Channels List -->
-                <h2 class="text-2xl font-semibold border-b pt-6 pb-2 mb-4 text-gray-700 mt-8">Approved Channels (Public List)</h2>
+                <h2 class="text-3xl font-bold primary-text border-b pb-2 pt-6 mt-8">Approved Channels</h2>
                 <div id="published-channels-list" class="space-y-4">
                     <!-- Approved channels will load here -->
                     <p class="text-center text-gray-500">Approved Channels loading...</p>
@@ -93,18 +110,18 @@
 
             <!-- Admin Dashboard View -->
             <div id="admin-dashboard-view" class="hidden">
-                <h2 class="text-2xl font-semibold border-b pb-2 mb-4 text-red-600">Admin Dashboard (Pending Appeals)</h2>
-                <button class="text-sm font-semibold text-white px-3 py-1 rounded-full bg-gray-500 hover:bg-gray-600 transition duration-150 mb-4" onclick="showSubmissionView()">
-                    Return to Public View
+                <h2 class="text-3xl font-bold text-red-600 border-b pb-2 mb-6">Admin Dashboard (Pending Appeals)</h2>
+                <button class="text-sm font-semibold text-white px-3 py-2 rounded-md bg-gray-500 hover:bg-gray-600 transition duration-150 mb-4" onclick="showSubmissionView()">
+                    ← Go Back to Submission View
                 </button>
                 <div id="pending-appeals-list" class="space-y-4">
                     <!-- Pending submissions will load here -->
-                    <p class="text-center text-gray-500">No pending appeals.</p>
+                    <p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">No pending appeals.</p>
                 </div>
             </div>
 
-            <!-- Custom Alert Message Box -->
-            <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
+            <!-- Custom Alert Message Box (same as before) -->
+            <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
                 <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
                     <h3 id="message-title" class="text-lg font-bold mb-3">Message</h3>
                     <p id="message-text" class="mb-4 text-gray-700"></p>
@@ -114,7 +131,12 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Imports -->
+    <!-- 3. Footer -->
+    <footer class="primary-bg text-white mt-8 py-4 text-center w-full">
+        <p class="text-sm">&copy; 2024 Channel Review Studio. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK Imports (Logic is the same as the previous version) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -180,11 +202,11 @@
                         document.getElementById('user-info').innerHTML = `
                             Your Status: <span class="font-semibold text-green-600">Authenticated</span>. 
                             UserID: <span class="text-xs break-all">${userId}</span>
+                            ${isAdmin ? '<span class="text-red-600 font-bold">(ADMIN)</span>' : ''}
                         `;
                         
                         if (isAdmin) {
                             document.getElementById('admin-link-btn').classList.remove('hidden');
-                            document.getElementById('user-info').innerHTML += ` <span class="text-red-600 font-bold">(ADMIN)</span>`;
                             // Set up the listener for pending appeals
                             setupPendingListener();
                         }
@@ -346,12 +368,12 @@
                     const docId = doc.id;
                     
                     const appealElement = `
-                        <div class="border p-4 rounded-lg shadow-md bg-white space-y-2">
+                        <div class="border p-4 rounded-lg shadow-md bg-white space-y-2 border-l-4 border-red-500">
                             <h3 class="text-xl font-bold text-gray-800">${data.name}</h3>
                             <p class="text-sm text-gray-600">Link: <a href="${data.link}" target="_blank" class="text-blue-500 hover:underline break-all">${data.link}</a></p>
                             <p class="text-sm text-gray-600">Category: <span class="font-medium bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">${data.category.toUpperCase()}</span></p>
                             <p class="text-gray-700 mt-1">Details: ${data.details}</p>
-                            <p class="text-xs text-gray-400">Submitted By: ${data.submittedBy.substring(0, 10)}... (ID: ${data.submittedBy})</p>
+                            <p class="text-xs text-gray-400">Submitted By: <span class="text-gray-600">${data.submittedBy}</span></p>
                             <div class="mt-3 flex space-x-2">
                                 <button onclick="handleAdminAction('${docId}', 'approve')" class="flex-1 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-150">
                                     Approve
@@ -362,29 +384,4 @@
                             </div>
                         </div>
                     `;
-                    listContainer.innerHTML += appealElement;
-                });
-            });
-        }
-
-
-        // Published Channels Listener (All Users)
-        function setupPublishedListener() {
-            if (!db) return;
-
-            const q = query(collection(db, PUBLISHED_COLLECTION));
-            
-            onSnapshot(q, (snapshot) => {
-                const listContainer = document.getElementById('published-channels-list');
-                listContainer.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    listContainer.innerHTML = '<p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">No channels have been approved yet.</p>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    
-                    const channelElement = `
-                        <div class="border border-green-100 p-4 rounded-lg bg-whatsapp-light-bg shadow-sm ho
+        
