@@ -3,143 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Channel Review Portal</title>
+    <title>WhatsApp Channel Directory</title>
     <!-- Load Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Set Inter font as default and apply a clean background */
+        /* Define the main font and base styling */
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #e5e7eb; /* Light gray background */
+            background-color: #f3f4f6; /* Light gray background */
+            min-height: 100vh;
         }
-        /* Define a core color palette for a professional look */
+        /* Custom colors */
         .primary-bg { background-color: #1f2937; } /* Dark Gray */
-        .primary-text { color: #1f2937; }
-        .accent-bg { background-color: #10b981; } /* Emerald Green for action */
-        .card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .accent-bg { background-color: #10b981; } /* Emerald Green */
+        .accent-hover:hover { background-color: #059669; }
         .input-focus:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
-        .main-container {
-            min-height: calc(100vh - 8rem); /* Adjust for header and footer height */
-            padding-bottom: 2rem;
+        .card-shadow { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .login-card, .admin-login-card {
+             animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. Navigation Header -->
+    <!-- 1. NAVIGATION HEADER (Fixed and clean) -->
     <nav class="primary-bg text-white shadow-lg sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <span class="text-2xl font-bold tracking-wider">Channel Review Studio</span>
+                    <span class="text-xl sm:text-2xl font-bold tracking-wider">Channel Directory</span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Nav Links -->
-                    <!-- Submission button will now navigate to #submission -->
-                    <a href="#submission" class="text-sm font-medium hover:text-gray-300 transition duration-150">
-                        Submission
-                    </a>
-                    <!-- Admin button will now navigate to #admin -->
-                    <a id="admin-link-btn" href="#admin" class="hidden text-sm font-medium text-yellow-300 hover:text-yellow-400 transition duration-150">
-                        Admin Panel
-                    </a>
+                <div id="nav-actions" class="flex items-center space-x-3">
+                    <!-- Links will appear here after user login -->
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- 2. Main Content Container -->
-    <div id="app" class="main-container flex flex-col items-center pt-8">
-        <div class="w-full max-w-4xl bg-white rounded-lg p-6 card">
+    <!-- 2. MAIN CONTENT AREA -->
+    <main class="max-w-7xl mx-auto p-4 sm:px-6 lg:px-8">
+        
+        <!-- Authentication Status (Fixed Position) -->
+        <div id="auth-status" class="hidden text-sm mb-4 p-3 bg-white rounded-lg shadow-sm border-l-4 border-gray-400">
+             <p id="user-info" class="text-gray-600">Status loading...</p>
+        </div>
 
-            <!-- Authentication Status and User ID -->
-            <div id="auth-status" class="mb-6 p-4 bg-gray-100 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center text-sm border-l-4 border-gray-400">
-                <p id="user-info" class="text-gray-600 mb-2 sm:mb-0">Your Status: <span class="font-semibold text-gray-600">Loading...</span></p>
+        <!-- 2a. PUBLIC USER LOGIN VIEW (Initial Gate) -->
+        <div id="login-view" class="flex flex-col items-center justify-center min-h-[70vh] min-h-screen">
+            <div class="login-card max-w-md w-full p-8 bg-white rounded-xl card-shadow text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Portal Access Karein</h2>
+                <p class="text-gray-600 mb-6">Aage badhne ke liye, hum aapko ek temporary ID denge (koi password nahi chahiye).</p>
+                <button id="login-btn" class="w-full py-3 px-4 rounded-md shadow-md text-lg font-medium text-white accent-bg accent-hover transition duration-150 flex items-center justify-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" id="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Shuru Karein
+                </button>
+                <p class="mt-4 text-sm text-gray-500">
+                    Agar aap Admin hain, toh pehle Shuru Karein, phir <a href="#adminlogin" class="text-blue-600 hover:underline">Admin Login Page</a> par jaayen.
+                </p>
             </div>
+        </div>
 
-            <!-- Submission Form View -->
-            <div id="submission-view" class="space-y-8">
-                <h2 class="text-3xl font-bold primary-text border-b pb-2">Submit a New WhatsApp Channel</h2>
-                <form id="channel-form" class="space-y-4 p-4 border border-gray-200 rounded-lg">
-
-                    <!-- Channel Name -->
+        <!-- 2b. ADMIN EXCLUSIVE LOGIN VIEW (NEW) -->
+        <div id="admin-login-view" class="flex flex-col items-center justify-center min-h-[70vh] min-h-screen hidden">
+            <div class="admin-login-card max-w-md w-full p-8 bg-white rounded-xl card-shadow text-center">
+                <a href="#public" class="text-sm font-semibold text-gray-500 hover:text-gray-700 mb-4 inline-block">← Wapas Public List Par Jaayen</a>
+                <h2 class="text-3xl font-bold text-red-600 mb-4">Admin Access</h2>
+                <p class="text-gray-600 mb-6">Apne Admin Username aur Password se login karein.</p>
+                <form id="admin-login-form" class="space-y-4">
                     <div>
-                        <label for="channel-name" class="block text-sm font-medium text-gray-700">Channel Name</label>
-                        <input type="text" id="channel-name" required placeholder="e.g., Daily Tech News" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                        <label for="admin-username" class="sr-only">Username</label>
+                        <input type="text" id="admin-username" required placeholder="Username" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
                     </div>
-
-                    <!-- Channel Link -->
                     <div>
-                        <label for="channel-link" class="block text-sm font-medium text-gray-700">Channel Link (Full URL)</label>
-                        <input type="url" id="channel-link" required placeholder="https://whatsapp.com/channel/..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                        <label for="admin-password" class="sr-only">Password</label>
+                        <input type="password" id="admin-password" required placeholder="Password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
                     </div>
-
-                    <!-- Channel Details / Description -->
-                    <div>
-                        <label for="channel-details" class="block text-sm font-medium text-gray-700">Channel Details (Short Description)</label>
-                        <textarea id="channel-details" rows="3" required placeholder="Describe the channel's purpose and content in brief." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus"></textarea>
-                    </div>
-
-                    <!-- Channel Category -->
-                    <div>
-                        <label for="channel-category" class="block text-sm font-medium text-gray-700">Select Category</label>
-                        <select id="channel-category" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus appearance-none bg-white">
-                            <option value="" disabled selected>--- Select Category ---</option>
-                            <option value="news">News</option>
-                            <option value="sports">Sports</option>
-                            <option value="entertainment">Entertainment</option>
-                            <option value="tech">Technology</option>
-                            <option value="finance">Finance & Business</option>
-                            <option value="lifestyle">Lifestyle & Health</option>
-                            <option value="education">Education</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-md shadow-md text-lg font-medium text-white accent-bg hover:bg-emerald-600 transition duration-150">
-                        Submit Channel for Review
+                    <button type="submit" id="admin-login-btn" class="w-full py-3 px-4 rounded-md shadow-md text-lg font-medium text-white bg-red-600 hover:bg-red-700 transition duration-150">
+                        Admin Login
                     </button>
                 </form>
+            </div>
+        </div>
 
-                <!-- Published Channels List -->
-                <h2 class="text-3xl font-bold primary-text border-b pb-2 pt-6 mt-8">Approved Channels</h2>
-                <div id="published-channels-list" class="space-y-4">
-                    <!-- Approved channels will load here -->
-                    <p class="text-center text-gray-500">Approved Channels loading...</p>
+
+        <!-- 2c. PUBLIC CHANNEL LIST VIEW (Requires Login) -->
+        <div id="public-view" class="space-y-6 pt-4 hidden">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800">Manzoor Shuda Channels</h1>
+
+            <!-- Search and Filter Bar -->
+            <div class="bg-white p-4 rounded-lg card-shadow flex flex-col sm:flex-row gap-4">
+                
+                <!-- Search Input -->
+                <div class="w-full sm:w-2/3">
+                    <label for="search-input" class="sr-only">Search</label>
+                    <input type="text" id="search-input" placeholder="Channel ka Naam ya Keyword dhoondhein..." 
+                           class="w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                </div>
+                
+                <!-- Category Filter -->
+                <div class="w-full sm:w-1/3">
+                    <label for="category-filter" class="sr-only">Category</label>
+                    <select id="category-filter" class="w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus appearance-none bg-white">
+                        <option value="all">-- Sabhi Categories --</option>
+                        <option value="news">News (Khabrein)</option>
+                        <option value="sports">Sports (Khel)</option>
+                        <option value="entertainment">Entertainment (Manoranjan)</option>
+                        <option value="tech">Technology (Takneek)</option>
+                        <option value="finance">Finance & Business (Vyapar)</option>
+                        <option value="lifestyle">Lifestyle & Health (Jeevan Shaili)</option>
+                        <option value="education">Education (Shiksha)</option>
+                        <option value="other">Other (Doosre)</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- Admin Dashboard View -->
-            <div id="admin-dashboard-view" class="hidden">
-                <h2 class="text-3xl font-bold text-red-600 border-b pb-2 mb-6">Admin Dashboard (Pending Appeals)</h2>
-                <!-- Button to navigate back to #submission -->
-                <a href="#submission" class="inline-block text-sm font-semibold text-white px-3 py-2 rounded-md bg-gray-500 hover:bg-gray-600 transition duration-150 mb-4">
-                    ← Go Back to Submission View
-                </a>
-                <div id="pending-appeals-list" class="space-y-4">
-                    <!-- Pending submissions will load here -->
-                    <p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">No pending appeals.</p>
-                </div>
+            
+            <!-- Channel List -->
+            <div id="published-channels-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="md:col-span-2 lg:col-span-3 text-center p-8 text-gray-500 bg-white rounded-lg card-shadow">Channels load ho rahe hain...</div>
             </div>
+        </div>
 
-            <!-- Custom Alert Message Box (same as before) -->
-            <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
-                    <h3 id="message-title" class="text-lg font-bold mb-3">Message</h3>
-                    <p id="message-text" class="mb-4 text-gray-700"></p>
-                    <button id="message-close" class="w-full py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Close</button>
+        <!-- 2d. SUBMISSION VIEW (Requires Login) -->
+        <div id="submit-view" class="submission-card max-w-lg mx-auto p-6 bg-white rounded-xl card-shadow hidden">
+            <a href="#public" class="text-sm font-semibold text-gray-500 hover:text-gray-700 mb-4 inline-block">← Wapas List Par Jaayen</a>
+            <h2 class="text-3xl font-bold text-gray-800 border-b pb-2 mb-6">Apna Channel Submit Karein</h2>
+            <form id="channel-form" class="space-y-4">
+
+                <div>
+                    <label for="channel-name" class="block text-sm font-medium text-gray-700">Channel Naam</label>
+                    <input type="text" id="channel-name" required placeholder="Udaaharan: Rozana Tech Khabrein" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
                 </div>
+
+                <div>
+                    <label for="channel-link" class="block text-sm font-medium text-gray-700">Channel Link (Poora URL)</label>
+                    <input type="url" id="channel-link" required placeholder="https://whatsapp.com/channel/..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus">
+                </div>
+
+                <div>
+                    <label for="channel-details" class="block text-sm font-medium text-gray-700">Channel Ki Jaankari (Mukhtasar Description)</label>
+                    <textarea id="channel-details" rows="3" required placeholder="Channel kis baare mein hai? Mukhtasar mein batayen." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus"></textarea>
+                </div>
+
+                <div>
+                    <label for="channel-category-submit" class="block text-sm font-medium text-gray-700">Category Chunein</label>
+                    <select id="channel-category-submit" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 input-focus appearance-none bg-white">
+                        <option value="" disabled selected>--- Category Chunein ---</option>
+                        <option value="news">News (Khabrein)</option>
+                        <option value="sports">Sports (Khel)</option>
+                        <option value="entertainment">Entertainment (Manoranjan)</option>
+                        <option value="tech">Technology (Takneek)</option>
+                        <option value="finance">Finance & Business (Vyapar)</option>
+                        <option value="lifestyle">Lifestyle & Health (Jeevan Shaili)</option>
+                        <option value="education">Education (Shiksha)</option>
+                        <option value="other">Other (Doosre)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 rounded-md shadow-md text-lg font-medium text-white accent-bg accent-hover transition duration-150">
+                    Review Ke Liye Submit Karein
+                </button>
+            </form>
+        </div>
+        
+        <!-- 2e. ADMIN DASHBOARD VIEW (Requires Admin Login) -->
+        <div id="admin-dashboard-view" class="hidden pt-4">
+            <a href="#public" class="text-sm font-semibold text-gray-500 hover:text-gray-700 mb-4 inline-block">← Wapas List Par Jaayen</a>
+            <h2 class="text-3xl font-bold text-red-600 border-b pb-2 mb-6">Admin Dashboard (Pending Requests)</h2>
+            <div id="pending-appeals-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="md:col-span-2 lg:col-span-3 text-center p-4 text-gray-500 bg-white rounded-lg card-shadow">Koi Pending Appeal Nahi.</div>
             </div>
+        </div>
+
+    </main>
+
+    <!-- 3. FOOTER -->
+    <footer class="primary-bg text-white mt-8 py-4 text-center w-full">
+        <p class="text-sm">&copy; 2024 Channel Directory. Sabhi Adhikaar Surakshit.</p>
+    </footer>
+
+    <!-- Custom Alert Message Box -->
+    <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 id="message-title" class="text-lg font-bold mb-3">Sandesh</h3>
+            <p id="message-text" class="mb-4 text-gray-700"></p>
+            <button id="message-close" class="w-full py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Band Karein</button>
         </div>
     </div>
 
-    <!-- 3. Footer -->
-    <footer class="primary-bg text-white mt-8 py-4 text-center w-full">
-        <p class="text-sm">&copy; 2024 Channel Review Studio. All rights reserved.</p>
-    </footer>
-
-    <!-- Firebase SDK Imports (Logic Updated for Hash Routing) -->
+    <!-- Firebase SDK and JavaScript Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -150,6 +208,12 @@
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // --- HARDCODED ADMIN CREDENTIALS (SECURITY RISK: CHANGE THIS) ---
+        // Warning: For demonstration only. In a real app, use Firebase Email/Password Auth or Cloud Functions.
+        const MASTER_ADMIN_USERNAME = 'admin';
+        const MASTER_ADMIN_PASSWORD = 'secret123';
+        // -----------------------------------------------------------------
+
         // --- Firebase Initialization Variables ---
         let app;
         let db;
@@ -157,19 +221,17 @@
         let userId = null;
         let isAdmin = false;
 
-        // Hardcoded admin UID mechanism for this prototype: 
-        // The first user who logs in sets the ADMIN_UID in localStorage.
-        const ADMIN_UID_KEY = 'admin_uid_for_app'; 
-        let ADMIN_UID = localStorage.getItem(ADMIN_UID_KEY);
-
         // Firestore Path Variables
         const PUBLIC_PATH = `artifacts/${appId}/public/data/`;
         const PENDING_COLLECTION = `${PUBLIC_PATH}pending_channels`;
         const PUBLISHED_COLLECTION = `${PUBLIC_PATH}published_channels`;
+        const ADMIN_CONFIG_DOC = doc(db, PUBLIC_PATH, 'app_config'); // Store Admin UID persistently
+
+        let allPublishedChannels = []; 
+        let isAuthReady = false; 
 
         // --- Utility Functions ---
 
-        // Custom Alert Function (To avoid using window.alert())
         function showMessage(title, message) {
             document.getElementById('message-title').textContent = title;
             document.getElementById('message-text').textContent = message;
@@ -180,216 +242,111 @@
                 document.getElementById('message-box').classList.remove('flex');
             };
         }
-
-        // --- View Switching Logic (Now controls the hash too) ---
-
-        // This function reads the hash and displays the correct view
+        
+        // --- View Switching (Hash Routing) ---
         function routeByHash() {
-            const hash = window.location.hash || '#submission';
+            if (!isAuthReady) return; 
+
+            const hash = window.location.hash || '#login';
             
-            // Default to submission view
-            document.getElementById('submission-view').classList.remove('hidden');
-            document.getElementById('admin-dashboard-view').classList.add('hidden');
-
-            if (hash === '#admin') {
-                if (isAdmin) {
-                    // Show admin view if hash is #admin AND user is admin
-                    document.getElementById('submission-view').classList.add('hidden');
-                    document.getElementById('admin-dashboard-view').classList.remove('hidden');
-                    // Hide the Admin button link when already on the dashboard
-                    document.getElementById('admin-link-btn').classList.add('hidden');
-                } else {
-                    // If a non-admin tries to access #admin, redirect them to #submission
-                    showMessage("Access Denied", "You do not have administrative privileges to view this page.");
-                    window.location.hash = 'submission';
-                }
-            } else if (hash === '#submission') {
-                // If on submission view, ensure admin button is visible if admin
-                if (isAdmin) {
-                    document.getElementById('admin-link-btn').classList.remove('hidden');
-                }
-            }
-        }
-
-        // Add event listener for when the hash changes (e.g., back/forward buttons)
-        window.addEventListener('hashchange', routeByHash);
-
-
-        // --- Firebase Setup and Authentication ---
-        if (firebaseConfig) {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Auth state listener
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        
-                        // Set the first authenticated user as the admin for this demo
-                        if (!ADMIN_UID) {
-                            ADMIN_UID = userId;
-                            localStorage.setItem(ADMIN_UID_KEY, ADMIN_UID);
-                            console.log("SUCCESS: Current user set as Admin for this app.");
-                        }
-
-                        isAdmin = (userId === ADMIN_UID);
-                        
-                        document.getElementById('user-info').innerHTML = `
-                            Your Status: <span class="font-semibold text-green-600">Authenticated</span>. 
-                            UserID: <span class="text-xs break-all">${userId}</span>
-                            ${isAdmin ? '<span class="text-red-600 font-bold">(ADMIN)</span>' : ''}
-                        `;
-                        
-                        if (isAdmin) {
-                            // Set up the listener for pending appeals
-                            setupPendingListener();
-                        }
-
-                        // Set up the listener for published channels
-                        setupPublishedListener();
-
-                        // IMPORTANT: Now that isAdmin is set, route the user based on the initial hash
-                        routeByHash();
-
-                    } else {
-                        // User logged out/not authenticated
-                        userId = null;
-                        isAdmin = false;
-                        document.getElementById('user-info').innerHTML = `Your Status: <span class="font-semibold text-red-600">Not Authenticated</span>.`;
-                        document.getElementById('admin-link-btn').classList.add('hidden');
-                        routeByHash(); // Route to submission if not logged in
-                    }
-                });
-
-                // Initial sign-in with custom token or anonymously
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-            } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-                showMessage("Error", "Could not initialize Firebase. Check console for details.");
-            }
-        } else {
-            showMessage("Database Error", "Firebase configuration is missing. The application will not function.");
-        }
-
-
-        // --- Channel Submission Logic and Admin Action Logic remain the same ---
-
-        document.getElementById('channel-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            // Hide all views first
+            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden'));
+            document.getElementById('nav-actions').innerHTML = '';
 
             if (!userId) {
-                showMessage("Authentication Required", "You must be authenticated to submit data. Please wait a moment for authentication to complete.");
+                // If not logged in, only show login view
+                document.getElementById('login-view').classList.remove('hidden');
                 return;
             }
 
-            const channelName = document.getElementById('channel-name').value.trim();
-            const channelLink = document.getElementById('channel-link').value.trim();
-            const channelDetails = document.getElementById('channel-details').value.trim();
-            const channelCategory = document.getElementById('channel-category').value;
-
-            if (!channelName || !channelLink || !channelDetails || !channelCategory) {
-                 showMessage("Required Information", "Please fill in all fields.");
-                 return;
+            // If logged in, set up navigation links
+            let navContent = '';
+            
+            if (isAdmin) {
+                 // Admin Panel Link
+                navContent += `<a id="admin-link-btn" href="#admin" class="text-xs sm:text-sm font-medium text-yellow-300 hover:text-yellow-400 p-2 rounded-lg bg-gray-800 transition duration-150">Admin Panel</a>`;
+            } else {
+                 // Admin Login Link for non-admins to become admin
+                 navContent += `<a id="admin-login-link" href="#adminlogin" class="text-xs sm:text-sm font-medium text-gray-300 hover:text-white p-2 transition duration-150">Admin Login</a>`;
             }
+            
+            // Submit Channel Button (Always visible when logged in)
+            navContent += `<a href="#submit" class="text-xs sm:text-sm font-bold text-white px-3 py-2 rounded-lg accent-bg accent-hover transition duration-150">Channel Submit Karein</a>`;
+            
+            document.getElementById('nav-actions').innerHTML = navContent;
+            
+            // Show the correct view based on hash
+            if (hash === '#public' || hash === '#login') {
+                document.getElementById('public-view').classList.remove('hidden');
+            } else if (hash === '#submit') {
+                document.getElementById('submit-view').classList.remove('hidden');
+            } else if (hash === '#admin') {
+                if (isAdmin) {
+                    document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                } else {
+                    showMessage("Pahunch Roka Gaya", "Aapko Admin panel dekhne ke liye Admin credentials se login karna hoga.");
+                    window.location.hash = 'adminlogin'; // Redirect to persistent admin login
+                }
+            } else if (hash === '#adminlogin') {
+                document.getElementById('admin-login-view').classList.remove('hidden');
+            } else {
+                window.location.hash = 'public'; 
+            }
+        }
+        
+        // Event listener for hash changes
+        window.addEventListener('hashchange', routeByHash);
 
-            const newChannel = {
-                name: channelName,
-                link: channelLink,
-                details: channelDetails,
-                category: channelCategory,
-                submittedBy: userId,
-                submittedAt: new Date().toISOString()
-            };
-
+        // --- Authentication Check ---
+        async function checkAdminStatus(currentUserId) {
             try {
-                // Add the channel to the pending collection
-                await addDoc(collection(db, PENDING_COLLECTION), newChannel);
-
-                showMessage("Submission Successful!", 
-                    "Your channel has been sent for review. It will appear in the public list once approved by the admin."
-                );
-
-                // Reset the form
-                document.getElementById('channel-form').reset();
+                const configDoc = await getDoc(ADMIN_CONFIG_DOC);
+                const masterAdminId = configDoc.exists() ? configDoc.data().adminUid : null;
+                
+                isAdmin = (currentUserId === masterAdminId);
+                
+                // Update UI based on status
+                document.getElementById('auth-status').classList.remove('hidden');
+                document.getElementById('user-info').innerHTML = `
+                    Aapka Status: <span class="font-semibold text-green-600">Verified</span>. 
+                    UserID: <span class="text-xs break-all">${currentUserId}</span>
+                    ${isAdmin ? '<span class="text-red-600 font-bold">(ADMIN)</span>' : ''}
+                `;
+                
+                // Set up listeners only after determining admin status
+                setupPublishedListener();
+                if (isAdmin) {
+                    setupPendingListener();
+                }
 
             } catch (error) {
-                console.error("Submission Error:", error);
-                showMessage("Submission Error", `The channel could not be submitted. Error: ${error.message}`);
+                console.error("Failed to check Admin Status:", error);
+            }
+        }
+
+        // --- Public User Login Handler (Anonymous) ---
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            if (!auth) {
+                showMessage("Galti (Error)", "Authentication service shuru nahi ho paya.");
+                return;
+            }
+
+            const loginBtn = document.getElementById('login-btn');
+            const spinner = document.getElementById('spinner');
+
+            loginBtn.disabled = true;
+            spinner.classList.remove('hidden');
+            loginBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" id="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Logging in...';
+
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Login Error:", error);
+                showMessage("Login Mein Galti", `Login nahi ho paya. Kripya dobara koshish karein. Error: ${error.message}`);
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Shuru Karein';
             }
         });
 
-        window.handleAdminAction = async function(docId, action) {
-            if (!isAdmin) {
-                showMessage("Permission Denied", "You do not have permission to perform this action.");
-                return;
-            }
-
-            const docRef = doc(db, PENDING_COLLECTION, docId);
-
-            try {
-                if (action === 'approve') {
-                    // Fetch the pending document
-                    const pendingDoc = await getDoc(docRef);
-                    if (pendingDoc.exists()) {
-                        const data = pendingDoc.data();
-                        
-                        // Copy to Published collection
-                        await setDoc(doc(db, PUBLISHED_COLLECTION, docId), {
-                            ...data,
-                            approvedBy: userId,
-                            approvedAt: new Date().toISOString(),
-                            status: 'approved'
-                        });
-
-                        // Delete from Pending collection
-                        await deleteDoc(docRef);
-                        showMessage("Approved", `Channel '${data.name}' has been successfully approved and uploaded to the public list.`);
-
-                    } else {
-                         showMessage("Error", "This appeal has already been approved or rejected.");
-                    }
-                } else if (action === 'reject') {
-                    // Delete from Pending collection
-                    await deleteDoc(docRef);
-                    showMessage("Appeal Rejected", "Channel submission has been rejected.");
-                }
-            } catch (error) {
-                console.error("Admin Action Error:", error);
-                showMessage("Action Error", `The action could not be completed. Error: ${error.message}`);
-            }
-        }
-
-
-        // --- Listeners for Realtime Data remain the same ---
-
-        // Pending Channels Listener (Admin Only)
-        function setupPendingListener() {
-            if (!db || !ADMIN_UID) return;
-
-            const q = query(collection(db, PENDING_COLLECTION));
-            
-            onSnapshot(q, (snapshot) => {
-                const listContainer = document.getElementById('pending-appeals-list');
-                listContainer.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    listContainer.innerHTML = '<p class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">There are no pending appeals.</p>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const docId = doc.id;
-                    
-                    const appealElement = `
-                        <div class="border p-4 rounded-lg shadow-md bg-white space-y-2 border-l-4 border-red-500">
-                            <h3 class="text-xl font-bold text-gray-800">${data.name}</h3>
-                            <p class="text-sm text-gray-600">Link: <a href="${data.link}" target="_blank" class="text-blue-500 hover:underline break-all">${data.link}</a></p>
-                            <p class="text-sm text-gray-60
+        // --- Persistent Admin Login Handler ---
+        document.getElementById('admin-login-form').addEventListen
